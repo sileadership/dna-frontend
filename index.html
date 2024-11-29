@@ -2613,7 +2613,7 @@ document.getElementById('analysisForm').addEventListener('submit', async (e) => 
         validateFinancialData(data);
         validateHistoricalData(data);
 
-        const response = await fetch('http://localhost:5000/analyze', {
+        const response = await fetch('https://dna-backend-1091742458180.us-central1.run.app/analyze', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
