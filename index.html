@@ -38,6 +38,31 @@
             z-index: 1000;
         } */
 
+        .unit-display {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        .unit-item {
+            background-color: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .input-wrapper {
+            position: relative;
+        }
+        .unit-suffix {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            font-size: 14px;
+            pointer-events: none;
+        }
+
         .loading-spinner {
             width: 50px;
             height: 50px;
@@ -768,6 +793,75 @@ function showNotification(message, type = 'success') {
         notification.classList.add('hidden');
     }, 3000);
 }
+function formatIndianNumber(num) {
+    if (num >= 10000000) return (num / 10000000).toFixed(2) + ' Cr';
+    if (num >= 100000) return (num / 100000).toFixed(2) + ' L';
+    if (num >= 1000) return (num / 1000).toFixed(2) + ' K';
+    return num.toString();
+}
+
+function updateUnitDisplay(input) {
+    const value = parseFloat(input.value) || 0;
+    const displayDiv = input.nextElementSibling;
+    if (!displayDiv || !displayDiv.classList.contains('unit-display')) return;
+
+    // Clear existing displays
+    displayDiv.innerHTML = '';
+
+    // Add unit displays
+    if (value >= 1000) {
+        const thousandDiv = document.createElement('span');
+        thousandDiv.className = 'unit-item';
+        thousandDiv.textContent = `${(value / 1000).toFixed(2)}K`;
+        displayDiv.appendChild(thousandDiv);
+    }
+
+    if (value >= 100000) {
+        const lakhDiv = document.createElement('span');
+        lakhDiv.className = 'unit-item';
+        lakhDiv.textContent = `${(value / 100000).toFixed(2)}L`;
+        displayDiv.appendChild(lakhDiv);
+    }
+
+    if (value >= 10000000) {
+        const croreDiv = document.createElement('span');
+        croreDiv.className = 'unit-item';
+        croreDiv.textContent = `${(value / 10000000).toFixed(2)}Cr`;
+        displayDiv.appendChild(croreDiv);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle numeric inputs
+    const numericInputs = document.querySelectorAll('input[type="number"]');
+    numericInputs.forEach(input => {
+        // Create display div
+        const displayDiv = document.createElement('div');
+        displayDiv.className = 'unit-display';
+        input.parentNode.insertBefore(displayDiv, input.nextSibling);
+
+        // Add event listeners
+        input.addEventListener('input', () => updateUnitDisplay(input));
+        input.addEventListener('focus', () => displayDiv.style.display = 'flex');
+        input.addEventListener('blur', () => {
+            if (!input.value) displayDiv.style.display = 'none';
+        });
+    });
+
+    // Handle historical data
+    const historicalInput = document.querySelector('input[name="historical_revenue"]');
+    if (historicalInput) {
+        const displayDiv = document.createElement('div');
+        displayDiv.className = 'unit-display';
+        historicalInput.parentNode.insertBefore(displayDiv, historicalInput.nextSibling);
+
+        historicalInput.addEventListener('input', () => {
+            const values = historicalInput.value.split(',').map(v => parseFloat(v.trim()) || 0);
+            displayDiv.innerHTML = values.map(v => formatIndianNumber(v)).join(', ');
+        });
+    }
+});
+
 
 function showLoading() {
     document.getElementById('loadingOverlay').classList.remove('hidden');
